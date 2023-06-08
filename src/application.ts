@@ -10,7 +10,14 @@ class CreateBillError extends Error {
 @LoggerKind('Application')
 class CreateBillController {
 
-  @CatchException()
+  @CatchException({
+    onError: err => {
+      return {
+        statusCode: 500,
+        error: err.message,
+      }
+    }
+  })
   public exec(value: any): any {
     if (typeof value !== 'number') {
       throw new CreateBillError(`${typeof value} is not assign to "value" parameter`)
@@ -22,5 +29,10 @@ class CreateBillController {
   }
 }
 
-const controller = new CreateBillController()
-controller.exec('2.2')
+(async () => {
+  const controller = new CreateBillController()
+  const res = await controller.exec('2.2')
+
+  console.log('\n\n')
+  console.log(res)
+})()

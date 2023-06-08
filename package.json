@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "run": "ts-node-dev --respawn --transpile-only src/application.ts"
+    "start": "ts-node-dev --respawn --transpile-only src/application.ts"
   },
   "devDependencies": {
     "@types/node": "^20.2.5",

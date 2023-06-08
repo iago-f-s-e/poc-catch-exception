@@ -2,6 +2,10 @@ type Kind = "Domain" | "Application" | "Infra"
 
 type Target =  { new(...args: any[]): {} }
 
+type CatchExceptionOptions = {
+  onError: (err: InstanceType<typeof Error>) => unknown
+}
+
 export function LoggerKind<T extends  Target>(kind: Kind) {
   return function (target: T) {
     Object.defineProperty(target.prototype, '__kind', {
@@ -11,7 +15,7 @@ export function LoggerKind<T extends  Target>(kind: Kind) {
   }
 }
 
-export function CatchException() {
+export function CatchException(options: CatchExceptionOptions) {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
@@ -33,6 +37,8 @@ export function CatchException() {
             kind: this.__kind
           }
         }, null, 2))
+
+        return options.onError(e)
       }
     }
   }
