@@ -1,12 +1,13 @@
-type Kind = "Domain" | "Application" | "Infra"
+import {Kind} from "./common";
+import {Logger} from "./logger";
 
-type Target =  { new(...args: any[]): {} }
+type Target = { new(...args: any[]): {} }
 
 type CatchExceptionOptions = {
   onError: (err: InstanceType<typeof Error>) => unknown
 }
 
-export function LoggerKind<T extends  Target>(kind: Kind) {
+export function LoggerKind<T extends Target>(kind: Kind) {
   return function (target: T) {
     Object.defineProperty(target.prototype, '__kind', {
       configurable: true,
@@ -23,20 +24,20 @@ export function CatchException(options: CatchExceptionOptions) {
       try {
         return await method.apply(this, args)
       } catch (e) {
-        console.error(JSON.stringify({
-          timestamp: new Date().toISOString(),
-          logger: {
-            name: target.name,
-            method_name: propertyKey,
-            params: args
-          },
-          error: {
-            stack: e.stack,
-            name: e.name,
-            message: e.message,
-            kind: this.__kind
-          }
-        }, null, 2))
+        const trigger = {
+          name: target.name,
+          method_name: propertyKey,
+          params: args
+        }
+
+        const err = {
+          stack: e.stack,
+          name: e.name,
+          message: e.message,
+          kind: this.__kind
+        }
+
+        Logger.error(trigger, err)
 
         return options.onError(e)
       }
