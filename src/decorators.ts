@@ -25,7 +25,7 @@ export function CatchException(options: CatchExceptionOptions) {
         return await method.apply(this, args)
       } catch (e) {
         const trigger = {
-          name: target.name,
+          name: this.constructor.name,
           method_name: propertyKey,
           params: args
         }
@@ -39,7 +39,9 @@ export function CatchException(options: CatchExceptionOptions) {
 
         Logger.error(trigger, err)
 
-        return options.onError(e)
+        const handleError = options.onError.bind(this)
+
+        return handleError(e)
       }
     }
   }

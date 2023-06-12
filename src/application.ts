@@ -1,4 +1,5 @@
 import {CatchException, LoggerKind} from "./decorators";
+import {HandleResponse} from "./common";
 
 class CreateBillError extends Error {
   constructor(message: string) {
@@ -8,31 +9,21 @@ class CreateBillError extends Error {
 }
 
 @LoggerKind('Application')
-class CreateBillController {
+export class CreateBillController {
+  constructor(private readonly handleResponse: HandleResponse) {}
 
   @CatchException({
-    onError: err => {
-      return {
-        statusCode: 500,
+    onError: function (err) {
+      return (this as CreateBillController).handleResponse.internalError( {
         error: err.message,
-      }
+      })
     }
   })
-  public exec(value: any): any {
-    if (typeof value !== 'number') {
-      throw new CreateBillError(`${typeof value} is not assign to "value" parameter`)
+  public exec(body: {value: number}) {
+    if (typeof body.value !== 'number') {
+      throw new CreateBillError(`${typeof body} is not assign to "value" parameter`)
     }
 
-    return {
-      statusCode: 201
-    }
+    return this.handleResponse.created( {message: 'ok'})
   }
 }
-
-(async () => {
-  const controller = new CreateBillController()
-  const res = await controller.exec('2.2')
-
-  console.log('\n\n')
-  console.log(res)
-})()
